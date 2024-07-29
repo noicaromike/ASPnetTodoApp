@@ -1,0 +1,175 @@
+﻿<div ng-controller="DashboardController">
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <span class="glyphicon glyphicon-user"></span>
+                <div>
+                    <h3>{{ user.Firstname }} {{ user.Lastname }}</h3>
+                    <p>{{ user.Username }}</p>
+                </div>
+            </div>
+            <ul class="nav nav-pills nav-stacked">
+                <li class="active"><a href="#">Home</a></li>
+                <li><a href="#">Message</a></li>
+                <li><a href="#">Profile</a></li>
+                <li><a href="#">User list</a></li>
+            </ul>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            {{message}}
+        </div>
+        
+
+        <!-- Main Content -->
+        <div class="main">
+            <!-- Filter Search -->
+            <div class="filter-search">
+                <div class="user-list">
+                    <span class="glyphicon glyphicon-user"></span>
+                    <div>
+                        <h3>User List</h3>
+                        <p>List of all users</p>
+                    </div>
+                </div>
+                <form class="form-inline" ng-submit="filterUsers()">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." ng-model="searchQuery">
+                    </div>
+                    <button type="submit" class="btn btn-default">Filter</button>
+                </form>
+            </div>
+
+            <div class="add-user-btn">
+                <!-- Add User Button -->
+                <button class="btn btn-primary add-user-button" data-toggle="modal" data-target="#addUserModal">Add User</button>
+            </div>
+
+            <!-- Table -->
+            <table class="table table-striped" ng-if="!selectedUser">
+                <thead>
+                    <tr>
+                        <th>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="select-all" ng-model="selectAll" ng-change="toggleAll()">
+                                <label for="select-all"></label>
+                            </div>
+                        </th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Task count</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="user in paginatedUsers() | filter:searchQuery">
+                        <td>
+                            <input type="checkbox" class="row-checkbox" ng-model="user.selected">
+                        </td>
+                        <td>{{ user.Firstname }}  {{user.Lastname}}</td>
+                        <td>{{ user.Email }}</td>
+                        <td>{{ user.taskCount }}</td>
+                        <td>
+                            <button class="btn btn-info btn-sm" ng-click="viewUser(user)">View</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <!-- Task Table -->
+            <div ng-if="selectedUser">
+                <h3>Tasks for {{ selectedUser.name }}</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="task in tasks">
+                            <td>{{ task }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-container" ng-if="!selectedUser">
+                <nav class="pagination">
+                    <ul class="pagination">
+                        <li ng-class="{disabled: currentPage === 1}">
+                            <a href="" ng-click="setPage(currentPage - 1)">&laquo;</a>
+                        </li>
+                        <li ng-repeat="page in [].constructor(totalPages()) track by $index" ng-class="{active: currentPage === $index + 1}">
+                            <a href="" ng-click="setPage($index + 1)">{{ $index + 1 }}</a>
+                        </li>
+                        <li ng-class="{disabled: currentPage === totalPages()}">
+                            <a href="" ng-click="setPage(currentPage + 1)">&raquo;</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="addUserModalLabel">Add New User</h4>
+                </div>
+                <div class="modal-body">
+                    <!-- Add User Form -->
+                    <form id="addUserForm" ng-submit="addUser()">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" class="form-control" id="username" ng-model="newUser.username" placeholder="Enter username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control" id="password" ng-model="newUser.password" placeholder="Enter password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="firstname">First Name</label>
+                            <input type="text" class="form-control" id="firstname" ng-model="newUser.firstname" placeholder="Enter first name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="middlename">Middlename</label>
+                            <input type="text" id="middlename" ng-model="newUser.middlename" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastname">Last Name</label>
+                            <input type="text" class="form-control" id="lastname" ng-model="newUser.lastname" placeholder="Enter last name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="prefix">Prefix</label>
+                            <input type="text" id="prefix" ng-model="newUser.prefix" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="suffix">Suffix</label>
+                            <input type="text" id="suffix" ng-model="newUser.suffix" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" ng-model="newUser.email" placeholder="Enter email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">Gender</label>
+                            <select class="form-control" id="gender" ng-model="newUser.gender" required>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="birthdate">Birthdate</label>
+                            <input type="date" class="form-control" id="birthdate" ng-model="newUser.birthdate" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add User</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
